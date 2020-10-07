@@ -1,31 +1,24 @@
 import React from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
-import ChatList from "./components/chatList"
-import {connect ,Loading} from "umi"
-
-const ChatPage : React.FC<mapStateToProps> = ({
-	chatList,
-	loading
-}) => (
+import { Card } from 'antd';
+import ChatListTab from './components/ChatListTab';
+import DilogBox from './components/DialogBox'
+import style from './index.less'
+const ChatPage: React.FC = () => (
 	<PageContainer>
-	<div>
-		    {JSON.stringify(chatList)}
-			<ChatList chatList={chatList}></ChatList>
-	</div>
-</PageContainer>
-)
-const mapStateToProps = ({
-	chatList,
-	loading,
-  }: {
-	chatList: [];
-	loading: Loading;
-  }) => {
-	return {
-	chatList,
-	chatListLoading: loading.models.chatList,
-	};
-  };
-  
+		<Card bordered>
+			<div className={style.chaContainer}>
+				<div className={style.chatTabContaner}>
+					<Card bordered>
+						<ChatListTab></ChatListTab>
+					</Card>
+				</div>
+				<div>
+					<DilogBox></DilogBox>
+				</div>
+			</div>
+		</Card>
+	</PageContainer>
+);
 
-export default connect(mapStateToProps)(ChatPage)
+export default ChatPage;
