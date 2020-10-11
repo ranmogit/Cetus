@@ -48,9 +48,15 @@ const errorHandler = (error: { response: Response }): Response => {
 /**
  * 配置request请求时的默认参数
  */
+const token =window.localStorage.getItem('token')||''
+
 const request = extend({
   errorHandler, // 默认错误处理
   credentials: 'include', // 默认请求是否带上cookie
+  headers: { 
+    // 'Content-Type': 'application/json;charset=utf-8',
+    'token':token
+   },
 });
 
 export default request;

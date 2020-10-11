@@ -1,5 +1,5 @@
 import { Subscription, Reducer, Effect } from 'umi';
-
+import { queryCusList } from '@/services/im';
 export interface ChatListModelType {
     namespace: 'chat';
     state: {};
@@ -14,9 +14,16 @@ const ChatListModel:ChatListModelType = {
     state: {
         chatList: [{xx:1111}]
     },
-    reducers: {
+    effects:{
+        *getCusList({payload},{call, put}){
+            const response = yield call(queryCusList, payload);
+            console.log(response)
+        }
     },
-    effects:{},
+    reducers: {
+
+    },
+    
     subscriptions:{}
 }
 

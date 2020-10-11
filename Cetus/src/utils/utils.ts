@@ -22,3 +22,27 @@ export const isAntDesignProOrDev = (): boolean => {
 };
 
 export const getPageQuery = () => parse(window.location.href.split('?')[1]);
+
+export const setUserInfo =(data)=>{
+  const storage = window.localStorage
+  storage.setItem('userName',data.uname)
+  storage.setItem('userCode',data.userCode)
+  storage.setItem('token',data.token)
+}
+export const getUserInfo = () =>{
+  // todo mock登录 会修改！！
+  const storage = window.localStorage
+  let data = {
+    name: storage.getItem('userName'),
+    country:'China',
+    avatar: 'https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png',
+    title: 'nothing',
+    group: 'null',
+    signature: 'null',
+    tags:[],
+    userid: storage.getItem('userCode'),
+    unreadCount: 0,
+  }
+
+  return data
+}
