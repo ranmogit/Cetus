@@ -12,7 +12,13 @@ const ChatListModel:ChatListModelType = {
     namespace: 'chat',
     
     state: {
-        chatList: [{xx:1111}]
+        chatList: [
+            {name:'荔枝荔枝', isNew:false, createTime:'23:23:20',content:'22222'},
+            {name:'荔枝荔枝', isNew:false, createTime:'23:23:20',content:'22222'},
+            {name:'荔枝荔枝', isNew:false, createTime:'23:23:20',content:'22222'},
+            {name:'荔枝荔枝', isNew:false, createTime:'23:23:20',content:'22222'},
+        ],
+        unReadCount:100
     },
     effects:{
         *getCusList({payload},{call, put}){

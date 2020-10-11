@@ -42,8 +42,8 @@ const ChatPage: React.FC = () => {
 	};
 
 	useEffect(()=>{
-		connectCount()
-		connectList()
+		// connectCount()
+		// connectList()
 	},[])
 	return (
 		<PageContainer>
