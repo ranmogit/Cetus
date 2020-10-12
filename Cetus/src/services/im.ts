@@ -10,9 +10,14 @@ export interface ImQueryCusListParamsType {
 
 export async function queryCusList(data) {
 	let type = data.type
-    return request(`/wjcApi/talkMag/queryCusList?type=${type}`, {
-      method: 'GET',
-    });
+    // return request(`/wjcApi/talkMag/queryCusList?type=${type}`, {
+    //   method: 'GET',
+	// });
+	return {
+		data:[
+			{msg:'1212',headImgUrl:'https://avatar-static.segmentfault.com/201/377/2013779927-5980a4bfd0dd7_big64'}
+		]
+	}
 }
 
 export async function httpQueryUncount() {
@@ -22,10 +27,17 @@ export async function httpQueryUncount() {
 }
   
 export async function httpTalkRecord(params) {
-    return request('/wjcApi/talkMag/queryMsgList', {
-	  method: 'POST',
-	  data: params,
-    });
+    // return request('/wjcApi/talkMag/queryMsgList', {
+	//   method: 'POST',
+	//   data: params,
+	// });
+	return {
+		data:[
+			{talkType:0,msgType:'text',msg:'121212542444444444444444444121212542444444444444444444121212542444444444444444444121212542444444444444444444121212542444444444444444444121212542444444444444444444121212542444444444444444444121212542444444444444444444'},
+			{talkType:1,msg:'1212',msgType:'text',},
+			{talkType:1,msg:'1212',msgType:'image',},
+		]
+	}
 }
   
 //清楚未读数字

@@ -6,9 +6,21 @@ import { connect } from 'umi';
 import Recorder from 'js-audio-recorder';
 const token:string = window.localStorage.getItem('token')||''
 const baseUrl = process.env.NODE_ENV === "production"? '' :'192.168.'
+
+let recorder:any = null;
+let playTimer = null;
 const ChatActions =({chat,dispatch})=>{
-    let recorder = new Recorder();
     const [modalVisible, setModalVisible] = useState(false);
+    const [isRecording,setIsRecording] = useState(false);
+    const [duration,setduration] = useState(0);
+    const collectData =()=>{
+        return {
+            sampleBits: 16,
+            sampleRate: 16000,
+            numChannels: 1,
+            compiling: false, 
+        }
+    }
     const submitHandler = ()=>{
         console.log(chat)
         let params = chat.chatDto
@@ -37,6 +49,7 @@ const ChatActions =({chat,dispatch})=>{
                 message.error(`${info.file.name} file upload failed.`);
               }
         },
+        showUploadList:false,
         customRequest(){
             console.log(1111)
         }
@@ -47,6 +60,82 @@ const ChatActions =({chat,dispatch})=>{
     const hanleOpenModel =() =>{
         setModalVisible(true);
     }
+    const startRecord=()=>{
+        clearPlay()
+        const config = collectData();
+        if (!recorder) {
+            console.log("sss")
+            recorder = new Recorder(config);
+            recorder.onprogress = (params) => {
+                // console.log(recorder.duration);
+                // console.log(recorder.fileSize);
+
+                setduration(params.duration.toFixed(5))
+                // 此处控制数据的收集频率
+                if (config.compiling) {
+                    console.log('音频总数据：', params.data);
+                }
+            }
+            // 定时获取录音的数据并播放
+            config.compiling && (playTimer = setInterval(() => {
+                if (!recorder) {
+                    return;
+                }
+
+                let newData = recorder.getNextData();
+                if (!newData.length) {
+                    return;
+                }
+                let byteLength = newData[0].byteLength
+                let buffer = new ArrayBuffer(newData.length * byteLength)
+                let dataView = new DataView(buffer)
+
+                    // 数据合并
+                for (let i = 0, iLen = newData.length; i < iLen; ++i) {
+                    for (let j = 0, jLen = newData[i].byteLength; j < jLen; ++j) {
+                        dataView.setInt8(i * byteLength + j, newData[i].getInt8(j))
+                    }
+                }
+
+                // 将录音数据转成WAV格式，并播放
+                let a = encodeWAV(dataView, config.sampleRate, config.sampleRate, config.numChannels, config.sampleBits)
+                let blob: any = new Blob([ a ], { type: 'audio/wav' });
+
+                blob.arrayBuffer().then((arraybuffer) => {
+                    //音频数据流
+                });
+            }, 3000))
+
+        }else{
+            recorder.stop();
+        }
+        recorder.start().then(() => {
+            console.log('开始录音');
+        }, (error) => {
+            console.log(`异常了,${error.name}:${error.message}`);
+        });
+
+    }
+    const clearPlay=()=>{
+        if (playTimer) {
+            clearInterval(playTimer);
+            playTimer = null;
+        }
+    }
+    const endRecord = () => {
+        recorder && recorder.stop();
+        console.log('结束录音');
+    }
+    const destroyRecord = () => {
+        clearPlay();
+        if (recorder) {
+            recorder.destroy().then(() => {
+                console.log('销毁实例');
+                recorder = null;
+                setduration(0)
+            });
+        }
+    }
     // const 
     return (
         <div  className={style.actions}>
@@ -55,7 +144,7 @@ const ChatActions =({chat,dispatch})=>{
                     <SmileOutlined className={style.icon}></SmileOutlined>
                 </div>
                 <div className={style.actionItem}>
-                   <Upload> <FolderOutlined className={style.icon} /> </Upload>
+                   <Upload {...upLoadConfig}> <FolderOutlined className={style.icon} /> </Upload>
                 </div> 
                 <div className={style.actionItem}><AudioOutlined className={style.icon}  onClick={hanleOpenModel}/></div>
             </div>
@@ -67,11 +156,10 @@ const ChatActions =({chat,dispatch})=>{
                 title="录音操作"
                 visible={modalVisible}
                 onOk={handleOk}
-                onCancel={()=>{setModalVisible(false)}}
+                onCancel={()=>{setModalVisible(false);destroyRecord()}}
                 >
-                <p>Some contents...</p>
-                <p>Some contents...</p>
-                <p>Some contents...</p>
+                <p> <Button type="primary" onClick={startRecord}> 开始录音</Button>  <Button onClick={endRecord}>停止录音</Button></p>
+                <p>录音时长{duration} s</p>
             </Modal>
         </div>
     )

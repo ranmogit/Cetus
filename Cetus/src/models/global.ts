@@ -122,7 +122,13 @@ const GlobalModel: GlobalModelType = {
 						},
 					)
 				}
-				connectChat()
+				// connectChat()
+				dispatch({
+					type: 'chat/getCusList',
+					payload: {
+						type: 0
+					}
+				})
 			});
 		},
 	},
