@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Tabs } from 'antd';
+import { Tabs ,Badge} from 'antd';
 import { connect, Dispatch } from 'umi';
 const { TabPane } = Tabs;
 import { queryCusList } from '@/services/im';
@@ -14,27 +14,29 @@ function callback(key) {
 interface ChatListTabPropsType {
 	type: number;
 }
-const ChatListTab: React.FC<ChatListTabPropsType> = ({ chat }) => {
-	// const { type = 1 } = props
-	console.log(chat)
+const ChatListTab: React.FC<ChatListTabPropsType> = ({ chat,dispatch }) => {
 	useEffect(() => {
-		const type = 1
-		// queryCusList(type).then(xx=>{
-		// 	console.log(xx)
-		// })
-
-	}, [])
+		
+	}, [chat])
 	return (
 		<div className={style.chatListTabContainer}>
 			<Tabs defaultActiveKey="1" onChange={callback} >
-				<TabPane tab="今日咨询" key="1">
+				<TabPane tab={
+					<Badge count={chat.unreadCountToday}>
+						<span>今日咨询</span>
+					</Badge>
+					} key="1" >
 					{
 						chat.chatList.map((item, index) => {
 							return <TabItem ChatItem={item} key={index}></TabItem>
 						})
 					}
 				</TabPane>
-				<TabPane tab="历史咨询" key="2">
+				<TabPane tab={
+					<Badge count={chat.unreadCountHistory}>
+						<span>历史咨询</span>
+					</Badge>
+					} key="2">
 					Content of Tab Pane 2
 				</TabPane>
 			</Tabs>

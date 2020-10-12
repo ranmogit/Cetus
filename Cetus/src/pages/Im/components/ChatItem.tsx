@@ -1,43 +1,33 @@
 
 import React from "react"
 import style from '../index.less'
+import { connect,Dispatch } from 'umi';
 interface ChatItemType {
     img: string;
     content : string
 }
 
-const chatData:Array = [
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'},
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'},
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'},
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'},
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'},
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'},
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'},
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'},
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'},
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'},
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'},
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'},
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'},
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'},
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'},
-    {img:'https://pic4.zhimg.com/da8e974dc_xs.jpg?source=1940ef5c',content:'123123123123'}
-]
-const ChatItem =() =>(
+const ChatItem =({chat}) =>(
     <div className={style.chatItemBox}>
         {
-        chatData.map((item,index) => {
+        chat.chatItems.map((item,index) => {
            return <div className={style.chatItem} key={index}>
-                        <div className={style.chatItemAvatar}>
-                            <img src={item.img}/>
+                        <div className={style.coloum}>
+                            <div className={style.chatItemAvatar}>
+                                <img src={chat.targetUser.headImgUrl}/>
+                            </div>
+                            <div className={style['chat-item-content']}>
+                                {item.msg}
+                            </div>
+                            
                         </div>
-                        <div className={style['chat-item-content']}>
-                            {item.content}
-                        </div>
+                        <div><p>{item.createTime}</p></div>
                     </div>
         })
     }
     </div>
 )
-export default ChatItem
+const  mapStateToProps = ({chat})=>{
+    return {chat}
+}
+export default connect(mapStateToProps)(ChatItem)

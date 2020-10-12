@@ -42,7 +42,8 @@ export default {
 			}
 		},
 		'/wjcApi': {
-			target: 'http://192.168.1.170:9413/hbyfIm',
+			target: 'http://192.168.1.160:9443/hbyfIm',
+			// target:'http://114.55.43.36:9443/hbyIm',
 			changeOrigin: true,
 			pathRewrite: {
 				'^/wjcApi': ''

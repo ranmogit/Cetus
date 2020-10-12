@@ -13,7 +13,7 @@
         position: relative;
         overflow: hidden;
         .chatItemBox{
-            min-height: 300px;
+            min-height: 400px;
             max-height: 400px;
             overflow-y: scroll;
            
@@ -21,7 +21,12 @@
             .chatItem{
                 display: flex;
                 justify-content: flex-start;
+                flex-direction: column;
                 margin-top: 5px;
+                .coloum{
+                    display: flex;
+                    justify-content: flex-start;
+                }
                 .chatItemAvatar{
                     width: 30px;
                     height: 30px;
@@ -68,6 +73,18 @@
                 .left{
                     display: flex;
                     justify-content: flex-start;
+                    .actionItem{
+                        width: 50px;
+                        height: 50px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        .icon{
+                            width: 80%;
+                            font-size: 20px;
+                            cursor: pointer;
+                        }
+                    }
                 }
             }
         }

@@ -1,140 +1,131 @@
 import { Subscription, Reducer, Effect } from 'umi';
-
 import { NoticeIconData } from '@/components/NoticeIcon';
-import { queryNotices } from '@/services/user';
-import { ConnectState } from './connect.d';
+import SockJS from 'sockjs-client';
+import Stomp from 'stompjs';
+import { httpQueryUncount } from '@/services/im'
+import { message } from 'antd';
+const host = "http://192.168.1.160:9443/hbyfIm";
+const token = window.localStorage.getItem('token') || ''
 
 export interface NoticeItem extends NoticeIconData {
-  id: string;
-  type: string;
-  status: string;
+	id: string;
+	type: string;
+	status: string;
 }
 
 export interface GlobalModelState {
-  collapsed: boolean;
-  notices: NoticeItem[];
+	collapsed: boolean;
+	notices: NoticeItem[];
+	imCount: number
 }
 
 export interface GlobalModelType {
-  namespace: 'global';
-  state: GlobalModelState;
-  effects: {
-    fetchNotices: Effect;
-    clearNotices: Effect;
-    changeNoticeReadState: Effect;
-  };
-  reducers: {
-    changeLayoutCollapsed: Reducer<GlobalModelState>;
-    saveNotices: Reducer<GlobalModelState>;
-    saveClearedNotices: Reducer<GlobalModelState>;
-  };
-  subscriptions: { setup: Subscription };
+	namespace: 'global';
+	state: GlobalModelState;
+	effects: {
+		fetchNotices: Effect;
+		clearNotices: Effect;
+		changeNoticeReadState: Effect;
+		getUncount: Effect
+	};
+	reducers: {
+		changeLayoutCollapsed: Reducer<GlobalModelState>;
+		saveNotices: Reducer<GlobalModelState>;
+		saveClearedNotices: Reducer<GlobalModelState>;
+	};
+	subscriptions: { setup: Subscription };
 }
 
 const GlobalModel: GlobalModelType = {
-  namespace: 'global',
+	namespace: 'global',
 
-  state: {
-    collapsed: false,
-    notices: [],
-  },
+	state: {
+		collapsed: false,
+		notices: [],
+		imCount: 0
+	},
 
-  effects: {
-    *fetchNotices(_, { call, put, select }) {
-      const data = yield call(queryNotices);
-      yield put({
-        type: 'saveNotices',
-        payload: data,
-      });
-      const unreadCount: number = yield select(
-        (state: ConnectState) => state.global.notices.filter((item) => !item.read).length,
-      );
-      yield put({
-        type: 'user/changeNotifyCount',
-        payload: {
-          totalCount: data.length,
-          unreadCount,
-        },
-      });
-    },
-    *clearNotices({ payload }, { put, select }) {
-      yield put({
-        type: 'saveClearedNotices',
-        payload,
-      });
-      const count: number = yield select((state: ConnectState) => state.global.notices.length);
-      const unreadCount: number = yield select(
-        (state: ConnectState) => state.global.notices.filter((item) => !item.read).length,
-      );
-      yield put({
-        type: 'user/changeNotifyCount',
-        payload: {
-          totalCount: count,
-          unreadCount,
-        },
-      });
-    },
-    *changeNoticeReadState({ payload }, { put, select }) {
-      const notices: NoticeItem[] = yield select((state: ConnectState) =>
-        state.global.notices.map((item) => {
-          const notice = { ...item };
-          if (notice.id === payload) {
-            notice.read = true;
-          }
-          return notice;
-        }),
-      );
+	effects: {
+		*getUncount({ payload }, { call, put }) {
+			console.log('ssssssss', payload)
+		}
+	},
 
-      yield put({
-        type: 'saveNotices',
-        payload: notices,
-      });
+	reducers: {
+		changeLayoutCollapsed(state = { notices: [], collapsed: true }, { payload }): GlobalModelState {
+			return {
+				...state,
+				collapsed: payload,
+			};
+		},
+		saveImCount(state, { payload }): GlobalModelState {
+			console.log(state, payload, 'payload ssssssss')
+			return {
+				collapsed: false,
+				...state,
+				imCount: payload.count,
+			};
+		}
+	},
 
-      yield put({
-        type: 'user/changeNotifyCount',
-        payload: {
-          totalCount: notices.length,
-          unreadCount: notices.filter((item) => !item.read).length,
-        },
-      });
-    },
-  },
+	subscriptions: {
+		setup({ dispatch, history }): void {
+			// Subscribe history(url) change, trigger `load` action if pathname is `/`
+			history.listen(({ pathname, search }): void => {
+				console.log('global')
+				if (typeof window.ga !== 'undefined') {
+					window.ga('send', 'pageview', pathname + search);
+				}
+				dispatch({
+					type: 'chat/setUnreadNumbers',
+					payload: {},
+				})
+				function connectChat() {
+					let socket = new SockJS(host + `/imSocket?token=${token}`);
+					let stompClient = Stomp.over(socket);
+					stompClient.connect({},
+						async function connectCallback(frame) {
+							await  dispatch({
+								type: 'chat/getCusList',
+								payload: {
+									type: 0
+								}
+							})
+							await dispatch({
+								type: 'chat/getTotalUncount',
+								payload: {}
+							})
+							stompClient.subscribe('/broker/queue/imSocket', async function (response) {
+								console.log('res:' + response.body);
 
-  reducers: {
-    changeLayoutCollapsed(state = { notices: [], collapsed: true }, { payload }): GlobalModelState {
-      return {
-        ...state,
-        collapsed: payload,
-      };
-    },
-    saveNotices(state, { payload }): GlobalModelState {
-      return {
-        collapsed: false,
-        ...state,
-        notices: payload,
-      };
-    },
-    saveClearedNotices(state = { notices: [], collapsed: true }, { payload }): GlobalModelState {
-      return {
-        ...state,
-        collapsed: false,
-        notices: state.notices.filter((item): boolean => item.type !== payload),
-      };
-    },
-  },
+								if (response) {
+									
+									await dispatch({
+										type: 'chat/getCusList',
+										payload: {
+											type: 0
+										}
+									})
+									await dispatch({
+										type: 'chat/getTotalUncount',
+										payload: {}
+									})
+									let chatData = (JSON.parse( response.body)).data
+									await dispatch({
+										type: 'chat/pushChat',
+										payload: chatData
+									})
 
-  subscriptions: {
-    setup({ history }): void {
-      // Subscribe history(url) change, trigger `load` action if pathname is `/`
-      history.listen(({ pathname, search }): void => {
-        console.log('global')
-        if (typeof window.ga !== 'undefined') {
-          window.ga('send', 'pageview', pathname + search);
+								}
 
-        }
-      });
-    },
-  },
+							});
+						},
+					)
+				}
+				connectChat()
+			});
+		},
+	},
 };
 
 export default GlobalModel;
