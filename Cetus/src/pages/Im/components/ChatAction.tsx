@@ -4,30 +4,46 @@ import { SmileOutlined ,FolderOutlined ,AudioOutlined} from '@ant-design/icons';
 import { Button ,Upload ,message,Modal} from 'antd';
 import { connect } from 'umi';
 import Recorder from 'js-audio-recorder';
+import {clearInputTxt ,scollTo} from '../actions'
 const token:string = window.localStorage.getItem('token')||''
-const baseUrl = process.env.NODE_ENV === "production"? '' :'192.168.'
+import {uploadFile} from '@/services/im'
+import  basicUrl  from '../../../../config/basicUrl'
+const host = basicUrl();
 
+let  lamejs = require("lamejs");
 let recorder:any = null;
 let playTimer = null;
 const ChatActions =({chat,dispatch})=>{
     const [modalVisible, setModalVisible] = useState(false);
-    const [isRecording,setIsRecording] = useState(false);
     const [duration,setduration] = useState(0);
+    const [imgVisible,setImgVisible] = useState(false)
+    const [mediaId,setmediaId] = useState('')
     const collectData =()=>{
         return {
             sampleBits: 16,
-            sampleRate: 16000,
+            sampleRate: 48000,
             numChannels: 1,
             compiling: false, 
         }
     }
-    const submitHandler = ()=>{
-        console.log(chat)
+    const submitHandler = async ()=>{
         let params = chat.chatDto
-        dispatch({
+        let chatParams = {
+            openId: chat.targetUser.openId,
+            pageNo: 1,
+            pageSize: 10
+        }
+        await dispatch({
             type:'chat/postImMsg',
             payload:params
         })
+        
+        await dispatch({
+            type:'chat/getChatRecord',
+            payload:chatParams
+        })
+        clearHandler()
+        scollTo()
     }
     const clearHandler= ()=>{
         let inputChat= document.getElementById('chatInput')
@@ -35,9 +51,13 @@ const ChatActions =({chat,dispatch})=>{
     }
     const upLoadConfig ={ 
         name: 'file',
-        action: 'https://www.mocky.io/v2/5cc8019d300000980a055e76',
+        action: `${host}/wx/uploadMedia`,
         headers: {
           token: token,
+        },
+        data: {
+            originalId: chat.targetUser.originalId,
+            mediaType: 'image',
         },
         onChange(info) {
             if (info.file.status !== 'uploading') {
@@ -45,17 +65,99 @@ const ChatActions =({chat,dispatch})=>{
               }
               if (info.file.status === 'done') {
                 message.success(`${info.file.name} file uploaded successfully`);
+                if(info.file.response && info.file.response.data.media_id){
+                    setmediaId(info.file.response.data.media_id)
+                    setImgVisible(true)
+                    console.log(mediaId)
+                }
+                
+                
+                // setMediaObj = 
               } else if (info.file.status === 'error') {
                 message.error(`${info.file.name} file upload failed.`);
               }
         },
         showUploadList:false,
-        customRequest(){
-            console.log(1111)
+    }
+    const handleSendImg = () =>{
+        let params = {
+            content: mediaId,
+            toUser: chat.targetUser.openId,
+            msgType: 1,
+            cusSource: chat.targetUser.originalId
         }
+        dispatch({
+            type:'chat/postImMsg',
+            payload: params
+        })
+        setImgVisible(false)
+
     }
     const handleOk  =() =>{
+        // if(recorder)
+        if(recorder.duration < 1 || recorder.duration >60){
+            message.error('语音不能太短或者太长哦')
+            return
+        }
+        let blob = convertToMp3(recorder)
+        console.log(blob)
+        const formData = new FormData()
+        const files = new window.File([blob], '录音.mp3', { type: 'audio/mp3' })
+        formData.append('upfile', blob, 'recorder.mp3')
+        formData.append('file', files)
+        formData.append('originalId',chat.targetUser.originalId)
+        formData.append('mediaType', 'voice')
+        uploadFile(formData).then(res=>{
+            console.log(res)
+            if(res.isSuccess) {
+                setmediaId(res.data.media_id)
+                let params = {
+                    content: res.data.media_id,
+                    toUser: chat.targetUser.openId,
+                    msgType: 2,
+                    cusSource: chat.targetUser.originalId
+                }
+                dispatch({
+                    type:'chat/postImMsg',
+                    payload: params
+                })
+                setModalVisible(false)
+                destroyRecord()
+            }
+        })
         setModalVisible(false);
+    }
+
+    function convertToMp3(wavDataView) {
+        // 获取wav头信息
+    // 此处其实可以不用去读wav头信息，毕竟有对应的config配置
+    
+        const mp3enc = new lamejs.Mp3Encoder(1,48000, 128);
+        // 获取左右通道数据
+        const result = recorder.getChannelData()
+        const buffer = [];
+    
+        const leftData = result.left && new Int16Array(result.left.buffer, 0, result.left.byteLength / 2);
+        const rightData = result.right && new Int16Array(result.right.buffer, 0, result.right.byteLength / 2);
+        const remaining = leftData.length + (rightData ? rightData.length : 0);
+    
+        const maxSamples = 1152;
+        for (let i = 0; i < remaining; i += maxSamples) {
+            const left = leftData.subarray(i, i + maxSamples);
+            let right = null;
+            let mp3buf = null;
+            mp3buf = mp3enc.encodeBuffer(left, right);
+            if (mp3buf.length > 0) {
+                buffer.push(mp3buf);
+            }
+        }
+    
+        const enc = mp3enc.flush();
+    
+        if (enc.length > 0) {
+            buffer.push(enc);
+        }
+        return new Blob(buffer, { type: 'audio/mp3' });
     }
     const hanleOpenModel =() =>{
         setModalVisible(true);
@@ -67,9 +169,6 @@ const ChatActions =({chat,dispatch})=>{
             console.log("sss")
             recorder = new Recorder(config);
             recorder.onprogress = (params) => {
-                // console.log(recorder.duration);
-                // console.log(recorder.fileSize);
-
                 setduration(params.duration.toFixed(5))
                 // 此处控制数据的收集频率
                 if (config.compiling) {
@@ -157,9 +256,19 @@ const ChatActions =({chat,dispatch})=>{
                 visible={modalVisible}
                 onOk={handleOk}
                 onCancel={()=>{setModalVisible(false);destroyRecord()}}
+                okText='发送'
+                cancelText="取消"
                 >
                 <p> <Button type="primary" onClick={startRecord}> 开始录音</Button>  <Button onClick={endRecord}>停止录音</Button></p>
                 <p>录音时长{duration} s</p>
+            </Modal>
+            <Modal
+             title="上传图片"
+             visible={imgVisible}
+             onOk={handleSendImg}
+             onCancel={()=>{setImgVisible(false)}}
+             >
+                 <img src={`${host}/wx/getMediaSource?mediaId=${mediaId}&header=image&originalId=${chat.targetUser.originalId}`} style={{width:'450px',height:'auto'}} alt=""/>
             </Modal>
         </div>
     )

@@ -1,8 +1,6 @@
 import { Subscription, Reducer, Effect } from 'umi';
 import { queryCusList ,httpTalkRecord,clearMsgCount,postMsg,httpQueryUncount} from '@/services/im';
-import SockJS from 'sockjs-client';
-import Stomp from 'stompjs';
-const host= "http://192.168.1.160:9443/hbyfIm";
+import {  message} from 'antd';
 const token =window.localStorage.getItem('token')||''
 export interface ChatListModelType {
     namespace: 'chat';
@@ -37,11 +35,15 @@ const ChatListModel:ChatListModelType = {
             msgType: 0,
             cusSource: ''
         },
-        chatContent:''
+        chatContent:'',
+        chatPageParams:{
+            pageNo: 1,
+            pageSize: 10,
+            hasNextPage:false
+        }
     },
     effects:{
         *getCusList({payload},{call, put}){
-            console.log(payload)
             const response = yield call(queryCusList, payload);
             if(response){
                 console.log(response)
@@ -49,21 +51,17 @@ const ChatListModel:ChatListModelType = {
                     type:'setCusList',
                     payload: response.data
                 })
-                yield put({
-                    type:'setUnreadNumbers',
-                    payload: response.data
-                })
             }
         },
 
         *getChatRecord({payload},{call, put}){
-            console.log(payload)
             const response = yield call(httpTalkRecord, payload);
             if(response){
                 yield put({
                     type:'setChatList',
                     payload: response.data
                 })
+
             }
         },
         *clearCount({payload},{call, put}){
@@ -80,6 +78,12 @@ const ChatListModel:ChatListModelType = {
         *postImMsg({payload},{call,put}){
            const response = yield call( postMsg, payload)
            console.log(response)
+           if(!response.isSuccess){
+                message.error(response.message);
+           }
+           else {
+            // message.success('消息已发送')
+           }
         },
         //获取未读总数
         *getTotalUncount({payload},{call,put}){
@@ -105,7 +109,7 @@ const ChatListModel:ChatListModelType = {
         setCusList(state,{payload}){
             return {
                 ...state,
-                chatList:payload
+                chatList:payload || []
 			};
         },
         setTargetUser(state,{payload}){
@@ -115,15 +119,31 @@ const ChatListModel:ChatListModelType = {
             }
         },
         setChatList(state,{payload}){
+            console.log(payload)
             return {
                 ...state,
-                chatItems:payload
+                chatItems:payload.wxTalkMsgVoList || [],
+                chatPageParams:{
+                    pageNo: payload.current,
+                    hasNextPage: payload.hasNextPage
+                }
             }
         },
+        
         pushChat(state,{payload}){
             let newData = state.chatItems
             if(payload.openId === state.targetUser.openId){
                 newData.push(payload)
+            }
+            return {
+                ...state,
+                chatItems:newData
+            }
+        },
+        popChat(state,{payload}){
+            let newData = state.chatItems
+            if(payload.openId === state.targetUser.openId){
+                newData.pop(payload)
             }
             return {
                 ...state,
@@ -136,10 +156,9 @@ const ChatListModel:ChatListModelType = {
                 chatDto:payload
             }
         },
-        clearInputTxt(){
-            let inputChat= document.getElementById('chatInput')
-            inputChat.value = ""
-        }
+        //清除发送内容
+        
+
     },
     
     subscriptions:{
@@ -148,40 +167,6 @@ const ChatListModel:ChatListModelType = {
             history.listen(({ pathname }) => {
                 if (pathname === '/imCenter/chat') {
                     // 获取联系人列表socket
-                    function connectChat(){
-                        let  socket =  new SockJS(host+`/imSocket?token=${token}`);
-                        let stompClient = Stomp.over(socket);
-                        let userListData = {}
-                        stompClient.connect({},  
-                            function connectCallback (frame){
-                                dispatch({
-                                    type:'getCusList',
-                                    payload:{
-                                        type:0
-                                    }
-                                })
-                                dispatch({
-                                    type:'getTotalUncount',
-                                    payload:{}
-                                })
-
-                                stompClient.subscribe('/broker/queue/imSocket', function(response) {
-                                    console.log('res:' +  response.body);
-                                    userListData = (JSON.parse( response.body)).data
-
-                                    if(response){
-                                        dispatch({
-                                            type:'getCusList',
-                                            payload:{
-                                                type:0
-                                            }
-                                        })
-                                    }
-                                    
-                                });
-                            },
-                        )
-                    }
                     // connectChat()
                 }
             })

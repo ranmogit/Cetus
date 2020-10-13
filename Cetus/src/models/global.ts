@@ -2,11 +2,12 @@ import { Subscription, Reducer, Effect } from 'umi';
 import { NoticeIconData } from '@/components/NoticeIcon';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
-import { httpQueryUncount } from '@/services/im'
-import { message } from 'antd';
-const host = "http://192.168.1.160:9443/hbyfIm";
+import  basicUrl  from '../../config/basicUrl'
+const host = process.env == 'produciton' ? '/' : 'http://wxxtest.jbx188.com:9443/hbyfIm';
 const token = window.localStorage.getItem('token') || ''
 
+// const RouterConfig = require('../../config/config').default.routes;
+console.log(process.env.REACT_APP_URL)
 export interface NoticeItem extends NoticeIconData {
 	id: string;
 	type: string;
@@ -59,7 +60,6 @@ const GlobalModel: GlobalModelType = {
 			};
 		},
 		saveImCount(state, { payload }): GlobalModelState {
-			console.log(state, payload, 'payload ssssssss')
 			return {
 				collapsed: false,
 				...state,
@@ -122,13 +122,7 @@ const GlobalModel: GlobalModelType = {
 						},
 					)
 				}
-				// connectChat()
-				dispatch({
-					type: 'chat/getCusList',
-					payload: {
-						type: 0
-					}
-				})
+				connectChat()
 			});
 		},
 	},

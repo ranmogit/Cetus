@@ -10,14 +10,9 @@ export interface ImQueryCusListParamsType {
 
 export async function queryCusList(data) {
 	let type = data.type
-    // return request(`/wjcApi/talkMag/queryCusList?type=${type}`, {
-    //   method: 'GET',
-	// });
-	return {
-		data:[
-			{msg:'1212',headImgUrl:'https://avatar-static.segmentfault.com/201/377/2013779927-5980a4bfd0dd7_big64'}
-		]
-	}
+    return request(`/wjcApi/talkMag/queryCusList?type=${type}`, {
+      method: 'GET',
+	});
 }
 
 export async function httpQueryUncount() {
@@ -27,17 +22,11 @@ export async function httpQueryUncount() {
 }
   
 export async function httpTalkRecord(params) {
-    // return request('/wjcApi/talkMag/queryMsgList', {
-	//   method: 'POST',
-	//   data: params,
-	// });
-	return {
-		data:[
-			{talkType:0,msgType:'text',msg:'121212542444444444444444444121212542444444444444444444121212542444444444444444444121212542444444444444444444121212542444444444444444444121212542444444444444444444121212542444444444444444444121212542444444444444444444'},
-			{talkType:1,msg:'1212',msgType:'text',},
-			{talkType:1,msg:'1212',msgType:'image',},
-		]
-	}
+    return request('/wjcApi/talkMag/queryMsgList', {
+	  method: 'POST',
+	  data: params,
+	});
+	
 }
   
 //清楚未读数字
@@ -47,6 +36,7 @@ export async function clearMsgCount(params) {
 	  data: params,
     });
 }
+
   
 // 发送消息
 export async function postMsg(params) {
@@ -56,21 +46,10 @@ export async function postMsg(params) {
     });
 }
 
-export async function  connectCount (){
-	let  socket = new SockJS(host+`/unReadMsgCount?token=${token}`);
-	let stompClient = Stomp.over(socket);
-	let count = 0
-	stompClient.connect({}, async function(frame) {
-		console.log('Connected:' + frame);
-		//监听的路径以及回调
-		
-		await httpQueryUncount().then(res=>{
-			console.log(res)
-			count = res.data
-			stompClient.subscribe('/broker/queue/unReadMsgCount', function(response) {
-				console.log('res:' + response.body);
-			});
-			
-		})
-	});
-};
+// 上传
+export async function uploadFile(params) {
+    return request('/wjcApi/wx/uploadMedia', {
+	  method: 'POST',
+	  data: params,
+    });
+}
