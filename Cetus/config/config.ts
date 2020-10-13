@@ -94,7 +94,14 @@ export default defineConfig({
 						name: 'IM-center-history',
 						icon: 'message',
 						path: '/imCenter/history',
-						component: './Im/history',
+            component: './Im/history',
+            // routes:[{
+            //   path: '/imCenter/history/detail',
+            //   name: '详情',
+            //   icon: 'smile',
+            //   component: './Welcome',
+         
+            // },]
 					},
 				]
 			},

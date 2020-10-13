@@ -53,3 +53,31 @@ export async function uploadFile(params) {
 	  data: params,
     });
 }
+
+//获取侧边栏
+export async function getRightMsgList (params) {
+  return request('/wjcApi/yfSideMsgInfo/list', {
+  method: 'POST',
+  data: params,
+  });
+}
+//编辑
+export async function editRightMsgList (params) {
+  return request('/wjcApi/yfSideMsgInfo', {
+  method: 'POST',
+  data: params,
+  });
+}
+//删除
+export async function deleteRightMsgList (params) {
+  return request(`/wjcApi/yfSideMsgInfo/${params}`, {
+  method: 'Delete',
+  });
+}
+//c查询咨询记录分页
+export async function getConsultList (params) {
+  return request('/wjcApi/consult/list',{
+  method: 'POST',
+  data: params,
+  });
+}

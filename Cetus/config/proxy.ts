@@ -42,8 +42,8 @@ export default {
 			}
 		},
 		'/wjcApi': {
-			target: 'http://192.168.1.160:9443/hbyfIm',
-			// target:'http://wxxtest.jbx188.com:9443/hbyfIm',
+			// target: 'http://192.168.1.160:9443/hbyfIm',
+			target:'http://wxxtest.jbx188.com:9443/hbyfIm',
 			changeOrigin: true,
 			pathRewrite: {
 				'^/wjcApi': ''
