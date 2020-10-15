@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { message, Modal, Table, Form, Row, Col, Input, Button } from 'antd'
-import { getArticleList, addRightMsgList } from '@/services/im';
-const AritcleList = (props, { dispatch }) => {
+import { getproductPageList, addRightMsgList,getproductUrl } from '@/services/im';
+const ProductList = (props, { dispatch }) => {
     const {
         editVisible,
         closeHandler
@@ -22,48 +22,50 @@ const AritcleList = (props, { dispatch }) => {
             getPageList()
         }
     }, [editVisible,pageParams])
-    const  previewHandler =(item)=>{
-        console.log(item)
-        window.open(`http://qcb.jbx188.com/article/material?id=${item.id}`)
+    const previewHref =(record)=>{
+        console.log(record)
+        getproductUrl({
+            channelCode: record.channelCode,
+            productId:record.productId,
+            userCode: window.localStorage.getItem('userCode')
+        }).then(res=>{
+            console.log(res)
+            // window.open(res.data)
+        })
+
     }
     const columns = [
         {
-            title: '文章ID',
-            dataIndex: 'id',
-            key: 'id',
+            title: '产品ID',
+            dataIndex: 'productId',
+            key: 'productId',
         },
         {
-            title: '文章名称',
-            dataIndex: 'title',
-            key: 'title',
+            title: '产品名称',
+            dataIndex: 'productName',
+            key: 'productName',
         },
         {
             title: '标签',
             dataIndex: 'tags',
             key: 'tags',
-            render: (text, record) => {
-                let tags = JSON.parse(text).tags
-                return tags.map((item, index) => {
-                    return (<div key={index + item.name}>
-                        {item.name}</div>)
-                })
-            }
         },
         {
             title: '操作',
             dataIndex: 'ac',
             key: 'ac',
             render:(text,record)=>{
-                return (<a onClick={()=> previewHandler(record)}>查看</a>)
+                return (<a onClick={() => previewHref(record)}>查看</a>)
             }
         },
     ]
     const getPageList = () => {
         let params = pageParams
-        getArticleList(params).then(res => {
+        getproductPageList(params).then(res => {
             if (res.code === '0000') {
-                setPageList(res.data.list)
-                setPageTotal(res.data.total)
+
+                setPageList(res.data)
+                setPageTotal(res.totalCount)
             }
         })
     }
@@ -79,7 +81,7 @@ const AritcleList = (props, { dispatch }) => {
     const savevHandler = () => {
         console.log(selectedIds)
         let params = {
-            content_type: 2,
+            content_type: 1,
             content: selectedIds.join()
         }
         addRightMsgList(params).then(res => {
@@ -129,8 +131,8 @@ const AritcleList = (props, { dispatch }) => {
             >
                 <Row gutter={24}>
                     <Form.Item
-                        name='nameSearch'
-                        label='文章名称'
+                        name='productName'
+                        label='产品名称'
                     >
                         <Input placeholder="请输入" />
                     </Form.Item>
@@ -142,10 +144,7 @@ const AritcleList = (props, { dispatch }) => {
                     <Button
                         style={{ margin: '0 8px' }}
                         onClick={() => {
-                            form.resetFields();
-                            setPageParams({...pageParams,
-                                nameSearch:null
-                            })
+                            form.resetFields()
                         }}
                     >
                         清空
@@ -154,7 +153,7 @@ const AritcleList = (props, { dispatch }) => {
             </Form>
                 <Table
                     columns={columns}
-                    rowKey="id"
+                    rowKey="productId"
                     dataSource={PageList}
                     rowSelection={rowSelection}
                     pagination={pagination}
@@ -162,4 +161,4 @@ const AritcleList = (props, { dispatch }) => {
         </Modal>
     )
 }
-export default AritcleList
+export default ProductList

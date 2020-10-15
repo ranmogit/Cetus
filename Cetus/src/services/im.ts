@@ -109,3 +109,11 @@ export async function getproductUrl (params) {
   data: params,
   });
 }
+
+//获取产品列表
+export async function getproductPageList (params) {
+  return request(`hbyfApi/hbyfProductMain/findHbyfProductMainList`,{
+  method: 'POST',
+  data: params,
+  });
+}

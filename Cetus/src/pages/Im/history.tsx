@@ -3,9 +3,17 @@ import { PageContainer } from '@ant-design/pro-layout';
 import { Table, Tag, Space } from 'antd';
 import { getConsultList } from '@/services/im'
 import { Row, Col, Divider, Card, Form, Input } from 'antd';
+import { history } from 'umi';
 export default (): React.ReactNode => {
 	const [pageParams, setPageParams] = useState({})
 	const [listData, setListData] = useState([])
+	useEffect(() => {
+		getList()
+	})
+	const gotoHref =()=>{
+		history.push('/imCenter/history/detail')
+		
+	}
 	const columns = [
 		{
 			title: '用户ID',
@@ -36,12 +44,10 @@ export default (): React.ReactNode => {
 			title: '操作',
 			dataIndex: 'operation',
 			render: (text, record) =>
-				<a>查看</a>
+				<a onClick={()=>{gotoHref()}}>查看</a>
 		},
 	]
-	useEffect(() => {
-		getList()
-	})
+	
 	const getList = () => {
 		let pam = {
 			pageNum: 1,

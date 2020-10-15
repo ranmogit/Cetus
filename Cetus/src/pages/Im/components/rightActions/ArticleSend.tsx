@@ -4,8 +4,9 @@ import style from './rightActions.less';
 import { CloseOutlined } from '@ant-design/icons';
 import { Button, Modal, Input, message, Checkbox, Form, Table } from 'antd';
 import InfiniteScroll from 'react-infinite-scroller';
-import { getRightMsgList, editRightMsgList, deleteRightMsgList, getArticleList } from '@/services/im';
+import { getRightMsgList, editRightMsgList, deleteRightMsgList } from '@/services/im';
 import { connect } from 'umi';
+import ArticleList from'./articleList'
 import { scollTo } from '../../actions';
 const { confirm } = Modal;
 const ArticleSend = ({ contentType, chat, dispatch }) => {
@@ -17,44 +18,19 @@ const ArticleSend = ({ contentType, chat, dispatch }) => {
     const [contentValue, setContentValue] = useState('');
     const [selectedId, setSelectedId] = useState([]);
     const [news, setNews] = useState([]);
-    const [pageTotal, setPageTotal] = useState(null);
-    const [pageParams, setPageParams] = useState({
-        pageNum: 1,
-        pageSize: 10,
-        managerUserUCode: window.localStorage.getItem('userCode')
-    })
-    const [selectedIds,setSelectedIds] = useState([])
+
+    
+  
 
     useEffect(() => {
         if (contentType == 2) {
             getListHandler();
         }
-        getPageList()
-    }, [contentType,pageParams]);
+    }, [contentType]);
     
-    const onChagePage = (val) => {
-        setPageParams({
-            ...pageParams,
-            pageNum: val
-        })
-        getPageList()
-    }
-  
 
     // 选择
-    const onSelectChange = selectedIds => {
-        setSelectedId(selectedIds)
-        console.log(selectedIds)
-    }
-
-    const rowSelection = {
-            selectedRowKeys: selectedIds,
-            onChange: (selectedRowKeys, selectedRows) => {
-                setSelectedIds(selectedRows)
-                console.log(`selectedRowKeys: ${selectedRowKeys}`, 'selectedRows: ', selectedRows);
-                
-            }
-        }
+    
     const loadFunc = () => {
     };
     const getListHandler = () => {
@@ -80,15 +56,7 @@ const ArticleSend = ({ contentType, chat, dispatch }) => {
             console.log(res);
         });
     };
-    const getPageList = () => {
-        let params = pageParams
-        getArticleList(params).then(res => {
-            if (res.code === '0000') {
-                setPageList(res.data.list)
-                setPageTotal(res.data.total)
-            }
-        })
-    }
+
     const handelDelete = (id) => {
         confirm({
             content: '确定要删除这条记录吗',
@@ -155,12 +123,7 @@ const ArticleSend = ({ contentType, chat, dispatch }) => {
         });
         setNews(newList);
     };
-    const pagination = {
-        onChange: onChagePage,
-        total: pageTotal
-    }
-
-
+   
     return (
         <div>
             <div style={{ height: '445px', overflow: 'auto' }}>
@@ -202,24 +165,13 @@ const ArticleSend = ({ contentType, chat, dispatch }) => {
                 <Button type="primary" onClick={() => handleSubmit()}>
                     发送文章
                  </Button>
-                <Button style={{ marginLeft: '20px' }} onClick={() => { setEditVisible(true); getPageList() }}> 新 增</Button>
+                <Button style={{ marginLeft: '20px' }} onClick={() => { setEditVisible(true); }}> 新 增</Button>
             </div>
-            <Modal
-                title="新增快捷回复文章"
-                visible={editVisible}
-                onOk={() => { setEditVisible(true) }}
-                onCancel={() => { setEditVisible(false) }}
-            >
-                <div>
-                    <Form.Item name="note" label="标题" >
-                        <Input />
-                    </Form.Item>
+            <ArticleList 
+                editVisible={editVisible}
+                closeHandler={()=>setEditVisible(false)}
 
-                </div>
-                <div >
-                    
-                </div>
-            </Modal>
+             ></ArticleList>
         </div>
     );
 };

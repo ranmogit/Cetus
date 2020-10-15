@@ -7,22 +7,20 @@ import InfiniteScroll from 'react-infinite-scroller';
 import { getRightMsgList, editRightMsgList ,deleteRightMsgList,getproductUrl} from '@/services/im'
 import { connect } from 'umi';
 import { scollTo } from '../../actions';
+import ProdutList from'./productList'
 const { TextArea } = Input;
 const { confirm } = Modal;
 const FastReply = ({ contentType,chat,dispatch }) => {
     const [list, setList] = useState([])
-    const [pageNum, setPageNum] = useState(1)
     const [editVisible, setEditVisible] = useState(false)
     const [defaultValue, setDefaultValue] = useState('')
     const [contentValue, setContentValue] = useState('')
     const [selectedId, setSelectedId] = useState('')
     const [news, setNews] = useState([]);
     useEffect(() => {
-        console.log('mouted', contentType)
         if (contentType ==1) {
             getListHandler()
         }
-
     }, [contentType])
     const loadFunc = () => {
         console.log('scolll')
@@ -161,18 +159,12 @@ const FastReply = ({ contentType,chat,dispatch }) => {
                  <Button type="primary" onClick={() => handleSubmit()}>
                     发送产品
                  </Button>
-                <Button type="primary"> 新 增</Button>
+                <Button style={{ marginLeft: '20px' }}  type="primary" onClick={() => { setEditVisible(true); }}> 新 增</Button>
             </div>
-            <Modal
-                title="编辑"
-                visible={editVisible}
-                onOk={handleEditOk}
-                onCancel={() => { setEditVisible(false) }}
-            >
-                <TextArea rows={4} defaultValue={defaultValue} onChange={(e) => { setContentValue(e.target.value) }} />
-
-
-            </Modal>
+                <ProdutList
+                 editVisible={editVisible}
+                 closeHandler={()=>setEditVisible(false)}
+                ></ProdutList>
         </div>
     )
 }
