@@ -6,9 +6,10 @@ export const clearInputTxt = () =>{
 
 export const scollTo =()=>{
     let chatItemBox = document.getElementById('chatItemBox')
-    let height = chatItemBox.offsetHeight
-    chatItemBox.scrollTop = 2000
-    // console.log(chatItemBox.scrollTop ,chatItemBox.offsetHeight)
+    let height = chatItemBox.scrollHeight + 120
+    setTimeout(() => {
+            chatItemBox.scrollTop = height
+    }, 500);
 }
 export const scorllFunc =() =>{
    

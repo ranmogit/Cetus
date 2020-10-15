@@ -23,16 +23,28 @@ const ChatListTab: React.FC<ChatListTabPropsType> = ({ chat, dispatch }) => {
 			}
 		})
 		await dispatch({
-			type: 'chat/setChatList',
-			payload: []
+			type: 'chat/setTabType',
+			payload: key
 		})
-
-		await dispatch({
-			type: 'chat/getCusList',
-			payload: {
-				type: key
-			}
-		})
+		if(key == 0){
+			await dispatch({
+				type: 'chat/setChatList',
+				payload: []
+			})
+			await dispatch({
+				type: 'chat/getCusList',
+				payload: {
+					type: key
+				}
+			})
+		}else{
+			await dispatch({
+				type: 'chat/getHistoryList',
+				payload: {
+					type: key
+				}
+			})
+		}
 		
 	}
 
@@ -56,7 +68,7 @@ const ChatListTab: React.FC<ChatListTabPropsType> = ({ chat, dispatch }) => {
 					</Badge>
 				} key="1">
 					{
-							chat.chatList.map((item, index) => {
+							chat.historyChatList.map((item, index) => {
 								return <TabItem ChatItem={item} key={index}></TabItem>
 							})
 						}

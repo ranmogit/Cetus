@@ -8,7 +8,8 @@ import {clearInputTxt ,scollTo} from '../actions'
 const token:string = window.localStorage.getItem('token')||''
 import {uploadFile} from '@/services/im'
 import  basicUrl  from '../../../../config/basicUrl'
-const host = basicUrl();
+const host = window.location.host == 'localhost:8000' ? '/wjcApi' :'http://cetus.jbx188.com/im';
+const uploadUrl = window.location.host == 'localhost:8000' ? '/wjcApi' :'/im'
 
 let  lamejs = require("lamejs");
 let recorder:any = null;
@@ -48,16 +49,44 @@ const ChatActions =({chat,dispatch})=>{
     const clearHandler= ()=>{
         let inputChat= document.getElementById('chatInput')
         inputChat.value = ""
+        let params = {
+            content:'',
+            toUser: chat.targetUser.openId,
+            msgType: 0,
+            cusSource: chat.targetUser.originalId
+        }
+        if(chat.targetUser.openId){
+            dispatch({
+                type:'chat/setMsgDto',
+                payload:params
+            })
+        }
     }
     const upLoadConfig ={ 
         name: 'file',
-        action: `${host}/wx/uploadMedia`,
+        action: `${uploadUrl}/wx/uploadMedia`,
         headers: {
           token: token,
         },
         data: {
             originalId: chat.targetUser.originalId,
             mediaType: 'image',
+        },
+        beforeUpload:(file)=>{
+            console.log(file)
+            const typeMap = {
+                'image/png':true,
+                'image/jpeg': true,
+                'image/jpg': true
+            }
+            if(file.size>9200000){
+                message.error('文件大小限制在5m')
+                return false
+            }
+            else if(!typeMap[file.type]){
+                message.error('文件类型不合法')
+                return false
+            }
         },
         onChange(info) {
             if (info.file.status !== 'uploading') {

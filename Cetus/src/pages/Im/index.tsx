@@ -20,7 +20,7 @@ const ChatPage: React.FC = () => {
 							<ChatListTab></ChatListTab>
 						</Card>
 					</div>
-					<div>
+					<div style={{width:'50%'}}>
 						<DilogBox></DilogBox>
 					</div>
 					<div>

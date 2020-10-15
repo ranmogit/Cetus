@@ -3,7 +3,8 @@ import { NoticeIconData } from '@/components/NoticeIcon';
 import SockJS from 'sockjs-client';
 import Stomp from 'stompjs';
 import  basicUrl  from '../../config/basicUrl'
-const host = process.env == 'produciton' ? '/' : 'http://wxxtest.jbx188.com:9443/hbyfIm';
+// const host = window.location.host == 'localhost:8000' ? 'http://wxxtest.jbx188.com:9443/hbyfIm' : 'http://cetus.jbx188.com:9443/hbyfIm';
+const host = 'http://cetus.jbx188.com:9443/hbyfIm'
 const token = window.localStorage.getItem('token') || ''
 
 // const RouterConfig = require('../../config/config').default.routes;
@@ -71,58 +72,63 @@ const GlobalModel: GlobalModelType = {
 	subscriptions: {
 		setup({ dispatch, history }): void {
 			// Subscribe history(url) change, trigger `load` action if pathname is `/`
+			dispatch({
+				type: 'chat/setUnreadNumbers',
+				payload: {},
+			})
+			function connectChat() {
+				let socket = new SockJS(host + `/imSocket?token=${token}`);
+
+				let stompClient = Stomp.over(socket);
+				stompClient.connect({},
+					async function connectCallback(frame) {
+						await  dispatch({
+							type: 'chat/getCusList',
+							payload: {
+								type: 0
+							}
+						})
+						await dispatch({
+							type: 'chat/getTotalUncount',
+							payload: {}
+						})
+						stompClient.subscribe('/broker/queue/imSocket', async function (response) {
+							console.log('res:' + response.body);
+							if (response) {
+								
+								await dispatch({
+									type: 'chat/getCusList',
+									payload: {
+										type: 0
+									}
+								})
+								await dispatch({
+									type: 'chat/getTotalUncount',
+									payload: {}
+								})
+								let chatData = (JSON.parse( response.body)).data
+								await dispatch({
+									type: 'chat/notifyNewMsg',
+									payload: chatData
+								})
+
+							}
+
+						});
+					},
+				)
+				
+			}
+			
+			connectChat()
 			history.listen(({ pathname, search }): void => {
-				console.log('global')
+				console.log('global',window.location.host)
+				
 				if (typeof window.ga !== 'undefined') {
 					window.ga('send', 'pageview', pathname + search);
 				}
-				dispatch({
-					type: 'chat/setUnreadNumbers',
-					payload: {},
-				})
-				function connectChat() {
-					let socket = new SockJS(host + `/imSocket?token=${token}`);
-					let stompClient = Stomp.over(socket);
-					stompClient.connect({},
-						async function connectCallback(frame) {
-							await  dispatch({
-								type: 'chat/getCusList',
-								payload: {
-									type: 0
-								}
-							})
-							await dispatch({
-								type: 'chat/getTotalUncount',
-								payload: {}
-							})
-							stompClient.subscribe('/broker/queue/imSocket', async function (response) {
-								console.log('res:' + response.body);
-
-								if (response) {
-									
-									await dispatch({
-										type: 'chat/getCusList',
-										payload: {
-											type: 0
-										}
-									})
-									await dispatch({
-										type: 'chat/getTotalUncount',
-										payload: {}
-									})
-									let chatData = (JSON.parse( response.body)).data
-									await dispatch({
-										type: 'chat/pushChat',
-										payload: chatData
-									})
-
-								}
-
-							});
-						},
-					)
-				}
-				connectChat()
+			
+				
 			});
 		},
 	},

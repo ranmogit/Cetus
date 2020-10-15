@@ -52,7 +52,7 @@ const ChatItem = ({ chat, dispatch }) => {
                         return <div className={style.chatItem} key={index}>
                             <div className={style.coloum}>
                                 <div className={style.chatItemAvatar}>
-                                    <img src={chat.targetUser.headImgUrl} />
+                                    <img src={chat.targetUser.headImgUrl? chat.targetUser.headImgUrl: 'https://yf-public.oss-cn-hangzhou.aliyuncs.com/feAsset/B4E10229-8CD6-4775-A13E-0573B4354EBD.png'} />
                                 </div>
                                 <div className={style['chat-item-content']}>
                                     {item.msgType === 'text' ?
@@ -62,7 +62,7 @@ const ChatItem = ({ chat, dispatch }) => {
                                 </div>
 
                             </div>
-                            <div><p>{item.createTime}</p></div>
+                            <div><p style={{fontSize:'12px'}}>{item.createTime}</p></div>
                         </div>
                     } else {
                         return <div className={style.chatItem} key={index}>
@@ -77,7 +77,7 @@ const ChatItem = ({ chat, dispatch }) => {
                                     <img src='https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png' />
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}><p>{item.createTime}</p></div>
+                            <div style={{ display: 'flex', justifyContent: 'flex-end' }}><p style={{fontSize:'12px'}}>{item.createTime}</p></div>
                         </div>
                     }
 

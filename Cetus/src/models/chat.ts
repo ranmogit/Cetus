@@ -1,7 +1,7 @@
 import { Subscription, Reducer, Effect } from 'umi';
-import { queryCusList ,httpTalkRecord,clearMsgCount,postMsg,httpQueryUncount} from '@/services/im';
+import { queryCusList ,httpTalkRecord,clearMsgCount,postMsg,httpQueryUncount,getUserInfo} from '@/services/im';
 import {  message} from 'antd';
-const token =window.localStorage.getItem('token')||''
+import {scollTo} from '../pages/Im/actions'
 export interface ChatListModelType {
     namespace: 'chat';
     state: {
@@ -23,6 +23,7 @@ const ChatListModel:ChatListModelType = {
     
     state: {
         chatList: [],
+        historyChatList:[],
         targetUser: {},
         unreadCountToday: 0,
         unreadCountHistory: 0,
@@ -40,20 +41,28 @@ const ChatListModel:ChatListModelType = {
             pageNo: 1,
             pageSize: 10,
             hasNextPage:false
-        }
+        },
+        userInfo: {}
     },
     effects:{
         *getCusList({payload},{call, put}){
             const response = yield call(queryCusList, payload);
             if(response){
-                console.log(response)
                 yield put({
                     type:'setCusList',
                     payload: response.data
                 })
             }
         },
-
+        *getHistoryList({payload},{call,put}){
+            const response = yield call(queryCusList,payload)
+            if(response){
+                yield put({
+                    type:'setHistoryChatList',
+                    payload:response.data
+                })
+            }
+        },
         *getChatRecord({payload},{call, put}){
             const response = yield call(httpTalkRecord, payload);
             if(response){
@@ -88,9 +97,24 @@ const ChatListModel:ChatListModelType = {
         //获取未读总数
         *getTotalUncount({payload},{call,put}){
             const response = yield call( httpQueryUncount, payload)
-            console.log(response)
             yield put({
                 type:"setUnreadNumbers",
+                payload: response.data
+            })
+        },
+        *notifyNewMsg({payload},{call,put}){
+            const response = payload 
+            yield put({
+                type:'pushChat',
+                payload: {...response}
+            })
+        },
+        *getUserInfo({payload},{call,put}){
+           
+            const response = yield call(getUserInfo,payload.id)
+            console.log(response)
+            yield put({
+                type:'setUserInfo',
                 payload: response.data
             })
         }
@@ -132,8 +156,11 @@ const ChatListModel:ChatListModelType = {
         
         pushChat(state,{payload}){
             let newData = state.chatItems
+            
             if(payload.openId === state.targetUser.openId){
                 newData.push(payload)
+                // let chatbox = document.getElementById('')
+                scollTo()
             }
             return {
                 ...state,
@@ -142,7 +169,7 @@ const ChatListModel:ChatListModelType = {
         },
         popChat(state,{payload}){
             let newData = state.chatItems
-            if(payload.openId === state.targetUser.openId){
+            if(payload.openId === state.targetUser.openId  ){
                 newData.pop(payload)
             }
             return {
@@ -156,7 +183,26 @@ const ChatListModel:ChatListModelType = {
                 chatDto:payload
             }
         },
-        //清除发送内容
+        setTabType(state,{payload}){
+            return{
+                ...state,
+                tabType:payload
+            }
+        },
+        //
+        setHistoryChatList(state,{payload}){
+            return{
+                ...state,
+                historyChatList:payload
+            }
+        },
+        // 用户侧边栏信息
+        setUserInfo(state,{payload}){
+            return{
+                ...state,
+                userInfo: payload
+            }
+        }
         
 
     },
