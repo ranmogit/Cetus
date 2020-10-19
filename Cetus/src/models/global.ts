@@ -76,9 +76,9 @@ const GlobalModel: GlobalModelType = {
 				type: 'chat/setUnreadNumbers',
 				payload: {},
 			})
+			
 			function connectChat() {
 				let socket = new SockJS(host + `/imSocket?token=${token}`);
-
 				let stompClient = Stomp.over(socket);
 				stompClient.connect({},
 					async function connectCallback(frame) {
@@ -88,14 +88,9 @@ const GlobalModel: GlobalModelType = {
 								type: 0
 							}
 						})
-						await dispatch({
-							type: 'chat/getTotalUncount',
-							payload: {}
-						})
-						stompClient.subscribe('/broker/queue/imSocket', async function (response) {
+						await stompClient.subscribe('/broker/queue/imSocket', async function (response) {
 							console.log('res:' + response.body);
-							if (response) {
-								
+							if (response) {	
 								await dispatch({
 									type: 'chat/getCusList',
 									payload: {
@@ -113,21 +108,22 @@ const GlobalModel: GlobalModelType = {
 								})
 
 							}
-
 						});
 					},
-				)
-				
+				)	
 			}
 			
-			connectChat()
+			// connectChat()
 			history.listen(({ pathname, search }): void => {
 				console.log('global',window.location.host)
 				
 				if (typeof window.ga !== 'undefined') {
 					window.ga('send', 'pageview', pathname + search);
 				}
-			
+				dispatch({
+					type: 'chat/getTotalUncount',
+					payload: {}
+				})
 				
 			});
 		},

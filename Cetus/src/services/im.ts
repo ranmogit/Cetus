@@ -117,3 +117,11 @@ export async function getproductPageList (params) {
   data: params,
   });
 }
+
+export function connectChat() {
+  let timer = null
+  timer = setInterval(()=>{
+    // console.log('xxxx')
+    return 'conneted'
+  },1000)
+}
