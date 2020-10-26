@@ -49,8 +49,13 @@ export default {
   'menu.editor.flow': '流程编辑器',
   'menu.editor.mind': '脑图编辑器',
   'menu.editor.koni': '拓扑编辑器',
-  'menu.IM':'IM平台咨询',
-  'menu.IM.IM-center-chat':'咨询窗口',
-  'menu.IM.IM-center-history':'历史咨询'
+  'menu.IM': 'IM平台咨询',
+  'menu.IM.IM-center-chat': '咨询窗口',
+  'menu.IM.IM-center-history': '历史咨询',
 
+  // 项目模块名
+  'menu.operation':'业务中心',
+  'menu.operation.SEM':'SEM推广',
+  'menu.operation.SEM.add':'新增',
+  'menu.operation.SEM.editor':'编辑',
 };

@@ -49,7 +49,7 @@ const UserModel: UserModelType = {
       });
     },
     *fetchCurrent(_, { call, put }) {
-      let response = getUserInfo()
+      let response = getUserInfo();
       yield put({
         type: 'saveCurrentUser',
         payload: response,

@@ -6,63 +6,62 @@
  * https://pro.ant.design/docs/deploy
  */
 export default {
-	dev: {
-		'/api/': {
-			target: 'https://preview.pro.ant.design',
-			changeOrigin: true,
-			pathRewrite: { '^': '' },
-		},
-		'/hbyfApi': {
-			target: 'http://114.55.43.36:9412/yfManager',
-			changeOrigin: true,
-			pathRewrite: {
-				'^/hbyfApi': ''
-			}
-		},
-		'/allot': {
-			// target: 'http://114.55.43.36:9412/yfManager',
-			target: 'http://114.55.43.36:9001/allot',
-			changeOrigin: true,
-			pathRewrite: {
-				'^/allot': ''
-			}
-		},
-		'/hbyfCloudApi': {
-			target: 'http://114.55.43.36:9426/',
-			changeOrigin: true,
-			pathRewrite: {
-				'^/hbyfCloudApi': ''
-			}
-		},
-		'/qcbApi': {
-			target: 'http://114.55.43.36:9411/hbyf',
-			changeOrigin: true,
-			pathRewrite: {
-				'^/qcbApi': ''
-			}
-		},
-		'/wjcApi': {
-			// target: 'http://192.168.1.160:9443/hbyfIm',
-			target:'http://wxxtest.jbx188.com:9443/hbyfIm',
-			changeOrigin: true,
-			pathRewrite: {
-				'^/wjcApi': ''
-			}
-		}
-		
-	},
-	test: {
-		'/api/': {
-			target: 'https://preview.pro.ant.design',
-			changeOrigin: true,
-			pathRewrite: { '^': '' },
-		},
-	},
-	pre: {
-		'/api/': {
-			target: 'your pre url',
-			changeOrigin: true,
-			pathRewrite: { '^': '' },
-		},
-	},
+  dev: {
+    '/api/': {
+      target: 'https://preview.pro.ant.design',
+      changeOrigin: true,
+      pathRewrite: { '^': '' },
+    },
+    '/hbyfApi': {
+      target: 'http://114.55.43.36:9412/yfManager',
+      changeOrigin: true,
+      pathRewrite: {
+        '^/hbyfApi': '',
+      },
+    },
+    '/allot': {
+      // target: 'http://114.55.43.36:9412/yfManager',
+      target: 'http://114.55.43.36:9001/allot',
+      changeOrigin: true,
+      pathRewrite: {
+        '^/allot': '',
+      },
+    },
+    '/hbyfCloudApi': {
+      target: 'http://114.55.43.36:9426/',
+      changeOrigin: true,
+      pathRewrite: {
+        '^/hbyfCloudApi': '',
+      },
+    },
+    '/qcbApi': {
+      target: 'http://114.55.43.36:9411/hbyf',
+      changeOrigin: true,
+      pathRewrite: {
+        '^/qcbApi': '',
+      },
+    },
+    '/ljhApi': {
+      // target: 'http://192.168.1.160:9443/hbyfIm',
+      target: 'http://114.55.43.36:9501',
+      changeOrigin: true,
+      pathRewrite: {
+        '^/ljhApi': '',
+      },
+    },
+  },
+  test: {
+    '/api/': {
+      target: 'https://preview.pro.ant.design',
+      changeOrigin: true,
+      pathRewrite: { '^': '' },
+    },
+  },
+  pre: {
+    '/api/': {
+      target: 'your pre url',
+      changeOrigin: true,
+      pathRewrite: { '^': '' },
+    },
+  },
 };

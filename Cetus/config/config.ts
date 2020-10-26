@@ -24,9 +24,6 @@ export default defineConfig({
   targets: {
     ie: 11,
   },
-  history: {
-    type: 'hash',
-  },
   // umi routes: https://umijs.org/docs/routing
   routes: [
     {
@@ -47,6 +44,7 @@ export default defineConfig({
         {
           path: '/',
           component: '../layouts/BasicLayout',
+          authority: ['admin', 'user'],
           routes: [
             {
               path: '/',
@@ -70,41 +68,36 @@ export default defineConfig({
                   name: 'sub-page',
                   icon: 'smile',
                   component: './Welcome',
-                  // authority: ['admin'],
+                  authority: ['admin'],
                 },
               ],
             },
             {
-              name: 'list.table-list',
-              icon: 'table',
-              path: '/list',
-              component: './ListTableList',
-            },
-            {
-              name: 'IM',
-              icon: 'message',
-              path: '/imCenter',
-              // component: './404',
+              name: 'operation',
+              icon: 'ProfileOutlined',
+              path: '/operation',
               routes: [
                 {
-                  name: 'IM-center-chat',
-                  icon: 'message',
-                  path: '/imCenter/chat',
-                  component: './Im',
-                },
-                {
-                  name: 'IM-center-history',
-                  icon: 'message',
-                  path: '/imCenter/history',
-                  component: './Im/history',
-                  // routes:[
-                  //   {
-                  //   name: 'IM-center-history-detail',
-                  //   path: '/imCenter/history/detail',
-                  //   component: './Im/history-detail',
-                  //   hideInMenu:true
-                  //   }
-                  // ]
+                  name: 'SEM',
+                  path: '/operation/sem',
+                  hideChildrenInMenu: true,
+                  component:'./SEM',
+                  routes: [
+                    {
+                      path: '/operation/sem',
+                      component: './SEM/list',
+                    },
+                    {
+                      name: 'add',
+                      path: '/operation/sem/add',
+                      component: './SEM/add',
+                    },
+                    {
+                      name: 'editor',
+                      path: '/operation/sem/:id',
+                      component: './SEM/editor',
+                    }
+                  ],
                 },
               ],
             },

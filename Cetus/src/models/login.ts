@@ -3,95 +3,94 @@ import { history, Reducer, Effect } from 'umi';
 
 import { accountLogin } from '@/services/login';
 import { setAuthority } from '@/utils/authority';
-import { getPageQuery,setUserInfo } from '@/utils/utils';
+import { getPageQuery, setUserInfo } from '@/utils/utils';
 import { notification } from 'antd';
 export interface StateType {
-	status?: 'ok' | 'error';
-	type?: string;
-	currentAuthority?: 'user' | 'guest' | 'admin';
+  status?: 'ok' | 'error';
+  type?: string;
+  currentAuthority?: 'user' | 'guest' | 'admin';
 }
 
 export interface LoginModelType {
-	namespace: string;
-	state: StateType;
-	effects: {
-		login: Effect;
-		logout: Effect;
-	};
-	reducers: {
-		changeLoginStatus: Reducer<StateType>;
-	};
+  namespace: string;
+  state: StateType;
+  effects: {
+    login: Effect;
+    logout: Effect;
+  };
+  reducers: {
+    changeLoginStatus: Reducer<StateType>;
+  };
 }
 
 const Model: LoginModelType = {
-	namespace: 'login',
+  namespace: 'login',
 
-	state: {
-		status: undefined,
-	},
+  state: {
+    status: undefined,
+  },
 
-	effects: {
-		*login({ payload }, { call, put }) {
-			const response = yield call(accountLogin, payload);
-			yield put({
-				type: 'changeLoginStatus',
-				payload: response,
-			});
-			console.log(response);
-			// Login successfully
-			if (response.code === '0000') {
-				let data = response.data
-				setUserInfo(data)
-				const urlParams = new URL(window.location.href);
-				const params = getPageQuery();
-				let { redirect } = params as { redirect: string };
-				
-				if (redirect) {
-					const redirectUrlParams = new URL(redirect);
-					if (redirectUrlParams.origin === urlParams.origin) {
-						redirect = redirect.substr(urlParams.origin.length);
-						if (redirect.match(/^\/.*#/)) {
-							redirect = redirect.substr(redirect.indexOf('#') + 1);
-						}
-					} else {
-						window.location.href = '/';
-						return;
-					}
-				}
-				history.replace(redirect || '/');
-			}
-			else {
-				notification.error({
-					description:  response.message ,
-					message: '发生错误',
-				  });
-			}
-		},
+  effects: {
+    *login({ payload }, { call, put }) {
+      const response = yield call(accountLogin, payload);
+      yield put({
+        type: 'changeLoginStatus',
+        payload: response,
+      });
+      console.log(response);
+      // Login successfully
+      if (response.code === '0000') {
+        let data = response.data;
+        setUserInfo(data);
+        const urlParams = new URL(window.location.href);
+        const params = getPageQuery();
+        let { redirect } = params as { redirect: string };
 
-		logout() {
-			const { redirect } = getPageQuery();
-			// Note: There may be security issues, please note
-			if (window.location.pathname !== '/user/login' && !redirect) {
-				history.replace({
-					pathname: '/user/login',
-					search: stringify({
-						redirect: window.location.href,
-					}),
-				});
-			}
-		},
-	},
+        if (redirect) {
+          const redirectUrlParams = new URL(redirect);
+          if (redirectUrlParams.origin === urlParams.origin) {
+            redirect = redirect.substr(urlParams.origin.length);
+            if (redirect.match(/^\/.*#/)) {
+              redirect = redirect.substr(redirect.indexOf('#') + 1);
+            }
+          } else {
+            window.location.href = '/';
+            return;
+          }
+        }
+        history.replace(redirect || '/');
+      } else {
+        notification.error({
+          description: response.message,
+          message: '发生错误',
+        });
+      }
+    },
 
-	reducers: {
-		changeLoginStatus(state, { payload }) {
-			setAuthority(payload.currentAuthority);
-			return {
-				...state,
-				status: payload.status,
-				type: payload.type,
-			};
-		},
-	},
+    logout() {
+      const { redirect } = getPageQuery();
+      // Note: There may be security issues, please note
+      if (window.location.pathname !== '/user/login' && !redirect) {
+        history.replace({
+          pathname: '/user/login',
+          search: stringify({
+            redirect: window.location.href,
+          }),
+        });
+      }
+    },
+  },
+
+  reducers: {
+    changeLoginStatus(state, { payload }) {
+      setAuthority(payload.currentAuthority);
+      return {
+        ...state,
+        status: payload.status,
+        type: payload.type,
+      };
+    },
+  },
 };
 
 export default Model;
