@@ -2,7 +2,7 @@ import { history, connect } from 'umi';
 import { PlusOutlined } from '@ant-design/icons';
 import React, { useState, useRef, useEffect } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Table, Form, Row, Col, Input, Button, Card } from 'antd';
+import { Table, Form, Row, Col, Input, Button, Card, Alert } from 'antd';
 import { TableListItem, responseParams, SEMLISTProps } from '../../models/sem';
 import { querySEM } from '@/services/sem';
 import { getColumns, getFields } from './config'
@@ -18,10 +18,11 @@ const SEMLIST: React.FC<SEMLISTProps> = ({ sem }, props) => {
 	const [selectedRowsState, setSelectedRows] = useState<TableListItem[]>([]);
 	const [isDetailShow, setIsDetailShow] = useState<boolean>(false);
 	const [listData, setListData] = useState([])
-	const [pageTotal,setPageTotal] = useState(null)
+	const [pageTotal, setPageTotal] = useState(null)
+	const [selectedRowKeys, setSelectedRowKeys] = useState([])
 	const [pageParams, setPageParams] = useState({
 		pageNum: 1,
-		pageSize: 100,
+		pageSize: 10,
 		fields: null
 	})
 	// 拉取数据
@@ -30,6 +31,7 @@ const SEMLIST: React.FC<SEMLISTProps> = ({ sem }, props) => {
 			if (res.code === 8200) {
 				setListData(res.data)
 				setPageTotal(res.total)
+				
 			}
 		})
 	}
@@ -60,18 +62,33 @@ const SEMLIST: React.FC<SEMLISTProps> = ({ sem }, props) => {
 			fields: { ...params }
 		})
 	}
-	const onPageChange =(val)=>{
-        // setPageParams({...pageParams,
-        //     pageNum:val
-        // })
-    }
+	//分页操作
+	const onPageChange = (page, pageSize) => {
+		console.log(page, pageSize)
+		setPageParams({...pageParams,
+			pageNum:page,
+			pageSize:pageSize
+		})
+	}
+
+	//选择项
+	const onSelectChange = selectedRowKeys => {
+		setSelectedRowKeys(selectedRowKeys)
+	}
+	const rowSelection = {
+		selectedRowKeys,
+		onChange: keys => onSelectChange(keys),
+	}
+
 	const channels = sem.channels
 	const articleIds = sem.articleIds
 	const accountIds = sem.OfficialAccounts
 	const pagination = {
-        total:pageTotal,
-        onChange: (val)=> onPageChange(val),
-    }
+		total: pageTotal,
+		showSizeChanger:true,
+		onChange: (page, pageSize) => onPageChange(page, pageSize),
+		// onShowSizeChange:(val)=> onPageChange(val)
+	}
 	return (
 		<PageContainer>
 			<Card>
@@ -83,7 +100,12 @@ const SEMLIST: React.FC<SEMLISTProps> = ({ sem }, props) => {
 				>
 					<Row gutter={24}>{getFields(channels, articleIds, accountIds)}</Row>
 					<Row>
-						<Col span={24} style={{ textAlign: 'right' }}>
+						<Col span={10}>
+							<Button type="primary" onClick={()=> navigateTo('/operation/sem/add')}>
+								新增
+							</Button>
+						</Col>
+						<Col span={14} style={{ textAlign: 'right' }}>
 							<Button type="primary" htmlType="submit">
 								搜 索
 							</Button>
@@ -98,17 +120,33 @@ const SEMLIST: React.FC<SEMLISTProps> = ({ sem }, props) => {
 									})
 								}}
 							>
-								Clear
+								重 置
 							</Button>
 						</Col>
 					</Row>
 				</Form>
+				<Row style={{ marginTop: '20px' }}>
+					<Col>
+							总共搜索到了{pageTotal}条数据
+					</Col>
+					<Col span="24">
+
+						{
+							selectedRowKeys.length ? (
+								<Alert message={`已选择了${selectedRowKeys.length}条数据`} type="info" showIcon />
+							)
+							 :''
+						 }
+					</Col>
+				</Row>
 			</Card>
+
 			<Table
 				rowKey="id"
 				columns={getColumns()}
-				dataSource={listData}>
-				pagination={pagination}
+				dataSource={listData}
+				rowSelection={rowSelection}
+				pagination={pagination}>
 			</Table>
 
 		</PageContainer>

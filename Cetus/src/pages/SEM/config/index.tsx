@@ -190,9 +190,12 @@ export const MaterialColums: ProColumns<MaterialListParams>[] = [
 	},
 	{
 		title: '头图',
-		dataIndex: 'img',
+		dataIndex: 'pic_path',
 		valueType: 'avatar',
-		search: false
+		search: false,
+		render:(_,record)=>(
+			<img src={record['pic_path']} style={{width:'100%',height:'120px'}}></img>
+		)
 	},
 	{
 		title: '标题',
@@ -201,13 +204,13 @@ export const MaterialColums: ProColumns<MaterialListParams>[] = [
 	},
 	{
 		title: '简介',
-		dataIndex: 'articleId',
+		dataIndex: 'description',
 		ellipsis: true,
 		search: false
 	},
 	{
 		title: '标签',
-		dataIndex: 'url',
+		dataIndex: 'tags',
 		valueType: 'text',
 		ellipsis: true,
 		search: false

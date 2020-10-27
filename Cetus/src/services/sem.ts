@@ -31,6 +31,21 @@ export async function queryAllOfficialAccounts(params:{}) {
   });
 }
 
+// 查询素材分页信息
+export async function queryAllArticleList(params:{}) {
+  return request('/ljhApi/sem/yfMaterialArticle/list', {
+    method:'POST',
+    data:params,
+  });
+}
+
+//通过id获取文章内容
+export async function queryArticleContent(id) {
+  return request(`/ljhApi/sem/yfMaterialArticle?id=${id}`, {
+    method:'get'
+  });
+}
+
 export async function removeSEM(params: { key: number[] }) {
   return request('/api/rule', {
     method: 'POST',
