@@ -1,14 +1,12 @@
 import { history, connect } from 'umi';
-import { PlusOutlined } from '@ant-design/icons';
 import React, { useState, useRef, useEffect } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Table, Form, Row, Col, Input, Button, Card, Alert } from 'antd';
+import { Table, Form, Row, Col, Input, Button, Card, Alert ,message} from 'antd';
 import { TableListItem, responseParams, SEMLISTProps } from '../../models/sem';
-import { querySEM } from '@/services/sem';
+import { querySEM ,deleteSEMItem} from '@/services/sem';
 import { getColumns, getFields } from './config'
 import moment from 'moment';
-import IFooter from './components/Footer'
-import Detail from './components/Detail'
+import BatchForm from './components/BatchForm'
 import './less/list.less'
 
 
@@ -16,7 +14,7 @@ import './less/list.less'
 const SEMLIST: React.FC<SEMLISTProps> = ({ sem }, props) => {
 	const [form] = Form.useForm();
 	const [selectedRowsState, setSelectedRows] = useState<TableListItem[]>([]);
-	const [isDetailShow, setIsDetailShow] = useState<boolean>(false);
+	const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
 	const [listData, setListData] = useState([])
 	const [pageTotal, setPageTotal] = useState(null)
 	const [selectedRowKeys, setSelectedRowKeys] = useState([])
@@ -41,6 +39,16 @@ const SEMLIST: React.FC<SEMLISTProps> = ({ sem }, props) => {
 	// 跳转
 	const navigateTo = (path: string) => {
 		history.push(path)
+		// console.log(path)
+	}
+	const handleDelete=(id)=>{
+		console.log(id)
+		deleteSEMItem(id).then(res=>{
+			if(res.isSuccess){
+				message.success('删除成功')
+				getList(pageParams)
+			}
+		})
 	}
 	const onFinish = (values) => {
 		console.log(values)
@@ -104,6 +112,11 @@ const SEMLIST: React.FC<SEMLISTProps> = ({ sem }, props) => {
 							<Button type="primary" onClick={()=> navigateTo('/operation/sem/add')}>
 								新增
 							</Button>
+							<Button 
+								onClick={()=>setIsModalVisible(true)}
+								style={{marginLeft:'20px'}}>
+								批量复制
+							</Button>
 						</Col>
 						<Col span={14} style={{ textAlign: 'right' }}>
 							<Button type="primary" htmlType="submit">
@@ -143,12 +156,12 @@ const SEMLIST: React.FC<SEMLISTProps> = ({ sem }, props) => {
 
 			<Table
 				rowKey="id"
-				columns={getColumns()}
+				columns={getColumns({navigateTo,handleDelete})}
 				dataSource={listData}
 				rowSelection={rowSelection}
 				pagination={pagination}>
 			</Table>
-
+			<BatchForm modalVisible={isModalVisible} onCancel={()=>{setIsModalVisible(false)}}></BatchForm>			 
 		</PageContainer>
 	);
 };

@@ -20,7 +20,7 @@ const Material: React.FC<MaerialProps> = props => {
     const [pageParams, setPageParams] = useState({
         pageNum: 1,
         pageSize: 10,
-        fields: null
+        fields: {}
     })
 
 

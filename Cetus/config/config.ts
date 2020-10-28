@@ -94,7 +94,7 @@ export default defineConfig({
                     },
                     {
                       name: 'editor',
-                      path: '/operation/sem/:id',
+                      path: '/operation/sem/edit',
                       component: './SEM/editor',
                     }
                   ],

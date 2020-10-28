@@ -23,14 +23,18 @@ const Editor: React.FC<EditorParamsProps> = props=>{
 
     useEffect(()=>{
         const editor:EditorConstructorProps = new E(containerRef.current);
-        editor.config.onchange = html => {
+        editor.config.onchange = (html) => {
             onChange(html)
         };
         editor.config.uploadImgShowBase64 = true; // 图片base64
         editor.create();
         // 设置初始内容
         editor.txt.html(value);
-    },[])
+        // editor.txt.append(value)
+        return ()=>{
+            editor.destroy()
+        }
+    },[value])
     return <div ref={containerRef}></div>
 }
 

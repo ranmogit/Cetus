@@ -41,8 +41,51 @@ export async function queryAllArticleList(params:{}) {
 
 //通过id获取文章内容
 export async function queryArticleContent(id) {
-  return request(`/ljhApi/sem/yfMaterialArticle?id=${id}`, {
+  return request(`/ljhApi/sem/yfMaterialArticle/${id}`, {
     method:'get'
+  });
+}
+
+//通过渠道查询域名列表
+export async function queryDominList(id) {
+  return request(`/ljhApi/sem/yfMaterialDomain/selectDomainByChannelId/${id}`, {
+    method:'get'
+  });
+}
+
+//获取全部模板
+export async function getAllTemplate(params) {
+  return request(`/ljhApi/sem/yfMaterialTemplate/selectAllTemplate`, {
+    method:'post',
+    // data:params
+  });
+}
+
+//新增sem
+export async function addSEMitem(params) {
+  return request(`/ljhApi/sem/yfMaterialPublish/saveMaterialPublish`, {
+    method:'post',
+    data:params
+  });
+}
+
+//通过id获取sem详情
+export async function getSEMDetail(id) {
+  return request(`/ljhApi/sem/yfMaterialPublish/${id}`, {
+    method:'get'
+  });
+}
+//编辑
+export async function editSEMitem(params) {
+  return request(`/ljhApi/sem/yfMaterialPublish`, {
+    method:'put',
+    data:params
+  });
+}
+// 删除
+export async function deleteSEMItem(id) {
+  return request(`/ljhApi/sem/yfMaterialPublish/${id}`, {
+    method:'delete'
   });
 }
 

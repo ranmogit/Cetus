@@ -1,5 +1,5 @@
 import { history, Reducer, Effect, Dispatch } from 'umi';
-import { querySEM ,queryAllChannels,queryAllArticleIds,queryAllOfficialAccounts} from '@/services/sem';
+import { querySEM ,queryAllChannels,queryAllArticleIds,queryAllOfficialAccounts,getAllTemplate} from '@/services/sem';
 import { notification } from 'antd';
 import { resetKey } from '../utils/utils'
 import Item from 'antd/lib/list/Item';
@@ -16,6 +16,7 @@ export interface SEMModelType {
 	state: object;
 	effects: {
 		fetchData: Effect;
+		fetchChanels:Effect;
 	};
 	reducers: {
 	};
@@ -80,7 +81,8 @@ const Model: SEMModelType = {
 	state: {
 		channels:[],
 		articleIds:[],
-		officialAccounts: []
+		officialAccounts: [],
+		templateIds:[]
 	},
 	effects: {
 		*fetchData({ payload }, { call, put }) {
@@ -92,30 +94,6 @@ const Model: SEMModelType = {
 					total: response.total,
 					pageSize: response.pageSize,
 					current: response.size,
-					success: true
-				}
-			} else {
-				notification.error({
-					description: response.message,
-					message: '发生错误',
-				});
-				return {
-					data: [],
-					total: 0,
-					pageSize: payload.pageSize,
-					current: payload.current,
-					success: false
-				}
-			}
-		},
-		*fetchMaterial({ payload }, { call, put }) {
-			const response = yield call(querySEM, resetKey(payload, 'current', 'pageNo'));
-			if (response.code === '0000') {
-				return {
-					data: response.data.list,
-					total: response.data.total,
-					pageSize: response.data.pageSize,
-					current: response.data.pageNum,
 					success: true
 				}
 			} else {
@@ -182,6 +160,23 @@ const Model: SEMModelType = {
 					payload: formatItems
 				})
 			}
+		},
+		//获取所有模板
+		*fetchTemplate({payload},{call,put}){
+			const response= yield call(getAllTemplate, payload)	
+			if(response.code === 8200){
+				const formatItems:array = []
+				response.data.map( item =>{
+					formatItems.push({
+						value:item.id,
+						label:item.name
+					})
+				})
+				yield put({
+					type:'setTemplateIds',
+					payload: formatItems
+				})
+			}
 		}
 	},
 
@@ -206,12 +201,19 @@ const Model: SEMModelType = {
 				OfficialAccounts: payload
             }
 		},
+		//
+		setTemplateIds(state,{payload}){
+			return {
+                ...state,
+				templateIds: payload
+            }
+		},
 	},
 	subscriptions: {
         setup({ dispatch, history }) {
             history.listen(({ pathname }) => {
 				//进入当前页sem时
-				if (pathname === '/operation/sem') {
+				if (pathname === '/operation/sem' || '/operation/sem/add') {
 					dispatch({
 						type:'fetchChanels',
 						payload:{}
@@ -224,6 +226,11 @@ const Model: SEMModelType = {
 						type:'fetchOfficialAccounts',
 						payload: {}
 					})
+					dispatch({
+						type:'fetchTemplate',
+						payload: {}
+					})
+					
 				}
 			})
 		}

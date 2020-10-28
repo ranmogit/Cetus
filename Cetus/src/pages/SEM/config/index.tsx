@@ -1,5 +1,5 @@
 import { ProColumns } from '@ant-design/pro-table';
-import { Form, Row, Col, Input, Button, Popconfirm, Select ,DatePicker} from 'antd';
+import { Form, Row, Col, Input, Button, Popconfirm, Select, DatePicker, Modal } from 'antd';
 import { TableListItem, MaterialListParams } from '../../../models/sem';
 import React from 'react';
 
@@ -9,15 +9,33 @@ const channelIdMap = {
 	3: '360',
 	4: '搜狗'
 }
-const officialAccountUIdMap ={
+const officialAccountUIdMap = {
 	1: '心橙保服务号,',
 	2: '橙意说保',
 	3: '小橙选保',
 	4: '青橙管家',
-	5:'大鱼柚子保'
+	5: '大鱼柚子保'
 }
+
 // 获取列 属性
-export const getColumns = () => {
+const infoModal = (info) => {
+	Modal.info({
+		title: '详情',
+		content: (
+			<div>
+				<br></br>
+				<p>使用模板: {info.template_id}</p>
+				<p>推广域名: {info.sub_channel}</p>
+				<p>子渠道:{info.sub_channel}</p>
+				<p>使用记录 {info.usage_record}</p>
+			</div>
+		),
+		okText:'确定'
+	});
+}
+export const getColumns = (props) => {
+	const { navigateTo, handleDelete } = props
+
 	const columns: ProColumns<TableListItem>[] = [
 		{
 			title: '推广ID',
@@ -55,7 +73,7 @@ export const getColumns = () => {
 			title: '推广渠道',
 			dataIndex: 'channel_id',
 			ellipsis: true,
-			render:(_,record)=>(
+			render: (_, record) => (
 				<span>{channelIdMap[record['channel_id']]}</span>
 			)
 		},
@@ -63,7 +81,7 @@ export const getColumns = () => {
 			title: '对接公众号',
 			dataIndex: 'domainUrl',
 			ellipsis: true,
-			render:(_,record)=>(
+			render: (_, record) => (
 				<span>{officialAccountUIdMap[record['official_account_id']]}</span>
 			)
 		},
@@ -78,16 +96,23 @@ export const getColumns = () => {
 			dataIndex: 'option',
 			valueType: 'option',
 			width: '15%',
-			render: (_, record) => (
-				<>
-					<a  > 详情 </a>
-					<a  > 编辑 </a>
-					<a > 复制 </a>
-					{/* <Popconfirm title="确定要删除吗?" onConfirm={del.bind(this, record)} okText="确定" cancelText="取消">
-						<a> 删除 </a>
-					</Popconfirm> */}
-				</>
-			),
+			render: (_, record) => {
+				let id = record.id
+				let editPath = '/operation/sem/edit?id=' + id
+
+				return (
+					<>
+						<a onClick={() => {
+							infoModal(record)
+						}}> 详情 </a>
+						<a onClick={() => { navigateTo(editPath) }}> 编辑 </a>
+						<a > 复制 </a>
+						<Popconfirm title="确定要删除吗?" onConfirm={() => { handleDelete(id) }} okText="确定" cancelText="取消">
+							<a> 删除 </a>
+						</Popconfirm>
+					</>
+				)
+			}
 		},
 	];
 
@@ -193,8 +218,8 @@ export const MaterialColums: ProColumns<MaterialListParams>[] = [
 		dataIndex: 'pic_path',
 		valueType: 'avatar',
 		search: false,
-		render:(_,record)=>(
-			<img src={record['pic_path']} style={{width:'100%',height:'120px'}}></img>
+		render: (_, record) => (
+			<img src={record['pic_path']} style={{ width: '100%', height: '120px' }}></img>
 		)
 	},
 	{
